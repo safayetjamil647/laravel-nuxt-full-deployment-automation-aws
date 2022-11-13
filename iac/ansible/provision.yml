@@ -1,0 +1,42 @@
+---
+
+
+- hosts: '{{ host }}'
+
+
+  gather_facts: yes
+    
+  remote_user: staging
+  become: yes 
+  become_method: sudo
+  vars:
+      app_base_path: "/home/basedir"
+      mysql_root_password: password
+      packages:
+      - mariadb-server
+      - mariadb-client
+  
+
+  tasks:
+    - name: Create App Base Directory
+      tags: deploy
+      file:
+        path: "{{app_base_path}}"
+        state: directory
+        mode: 0777
+    
+    - name: Print debug message
+      debug: msg="Hello World"
+    
+    - name: Install Mysql
+      apt: 
+        update_cache: yes
+        cache_valid_time: 0
+        state: present
+        name: "{{packages}}"
+    - name: Start MySQL service
+      systemd: 
+        name: mysqld
+        state: started
+        enabled: yes
+    
